@@ -1,0 +1,169 @@
+name: Deploy Soroban Contracts to Testnet
+
+on:
+  workflow_dispatch:
+    inputs:
+      admin_secret:
+        description: 'Stellar secret key for deployment (S...)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Build & Deploy Contracts
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 1. Install Rust ────────────────────────────────────────────────
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+
+      # ── 2. Install Stellar CLI ─────────────────────────────────────────
+      - name: Install Stellar CLI
+        run: |
+          cargo install --locked stellar-cli --features opt
+
+      # ── 3. Configure testnet identity ─────────────────────────────────
+      - name: Set up Stellar identity
+        env:
+          STELLAR_SECRET: ${{ github.event.inputs.admin_secret }}
+        run: |
+          stellar keys add deployer --secret-key $STELLAR_SECRET
+          stellar network add testnet \
+            --rpc-url https://soroban-testnet.stellar.org \
+            --network-passphrase "Test SDF Network ; September 2015"
+          # Fund via friendbot if needed
+          ADMIN_PK=$(stellar keys public-key deployer)
+          echo "ADMIN_PUBLIC_KEY=$ADMIN_PK" >> $GITHUB_ENV
+          curl -s "https://friendbot.stellar.org/?addr=$ADMIN_PK" || true
+
+      # ── 4. Build all contracts ─────────────────────────────────────────
+      - name: Build reward contract
+        run: |
+          cd contracts/reward
+          stellar contract build
+          ls -la target/wasm32-unknown-unknown/release/
+
+      - name: Build counter contract
+        run: |
+          cd contracts/counter
+          stellar contract build
+          ls -la target/wasm32-unknown-unknown/release/
+
+      - name: Build payment_splitter contract
+        run: |
+          cd contracts/payment_splitter
+          # payment_splitter imports reward WASM, ensure it's compiled first
+          cp ../reward/target/wasm32-unknown-unknown/release/reward.wasm \
+             target/wasm32-unknown-unknown/release/reward.wasm 2>/dev/null || true
+          stellar contract build
+          ls -la target/wasm32-unknown-unknown/release/
+
+      # ── 5. Deploy SDT Token (SEP-0041 via SAC) ────────────────────────
+      - name: Deploy SDT Token contract
+        run: |
+          # Create a Stellar Asset (SDT) and deploy its Stellar Asset Contract
+          ADMIN_PK=$(stellar keys public-key deployer)
+          # Issue asset directly via stellar-sdk
+          SDT_ADDRESS=$(stellar contract asset deploy \
+            --asset SDT:$ADMIN_PK \
+            --network testnet \
+            --source deployer 2>&1 | tail -1)
+          echo "SDT_TOKEN_ADDRESS=$SDT_ADDRESS" >> $GITHUB_ENV
+          echo "Deployed SDT token: $SDT_ADDRESS"
+
+      # ── 6. Deploy Counter contract ────────────────────────────────────
+      - name: Deploy Counter contract
+        run: |
+          ADMIN_PK=$(stellar keys public-key deployer)
+          COUNTER_ID=$(stellar contract deploy \
+            --wasm contracts/counter/target/wasm32-unknown-unknown/release/counter.wasm \
+            --network testnet \
+            --source deployer 2>&1 | tail -1)
+          echo "COUNTER_CONTRACT_ID=$COUNTER_ID" >> $GITHUB_ENV
+          echo "Deployed Counter: $COUNTER_ID"
+
+          # Initialize the counter contract
+          stellar contract invoke \
+            --id $COUNTER_ID \
+            --network testnet \
+            --source deployer \
+            -- initialize \
+            --owner $ADMIN_PK || true
+
+      # ── 7. Deploy Reward contract ─────────────────────────────────────
+      - name: Deploy Reward contract
+        run: |
+          ADMIN_PK=$(stellar keys public-key deployer)
+          REWARD_ID=$(stellar contract deploy \
+            --wasm contracts/reward/target/wasm32-unknown-unknown/release/reward.wasm \
+            --network testnet \
+            --source deployer 2>&1 | tail -1)
+          echo "REWARD_CONTRACT_ID=$REWARD_ID" >> $GITHUB_ENV
+          echo "Deployed Reward: $REWARD_ID"
+
+          # Initialize with admin and SDT token
+          stellar contract invoke \
+            --id $REWARD_ID \
+            --network testnet \
+            --source deployer \
+            -- initialize \
+            --admin $ADMIN_PK \
+            --reward_token $SDT_TOKEN_ADDRESS || true
+
+      # ── 8. Deploy Payment Splitter contract ───────────────────────────
+      - name: Deploy Payment Splitter contract
+        run: |
+          ADMIN_PK=$(stellar keys public-key deployer)
+          SPLITTER_ID=$(stellar contract deploy \
+            --wasm contracts/payment_splitter/target/wasm32-unknown-unknown/release/payment_splitter.wasm \
+            --network testnet \
+            --source deployer 2>&1 | tail -1)
+          echo "PAYMENT_SPLITTER_ADDRESS=$SPLITTER_ID" >> $GITHUB_ENV
+          echo "Deployed Splitter: $SPLITTER_ID"
+
+          # Initialize with admin and reward contract
+          stellar contract invoke \
+            --id $SPLITTER_ID \
+            --network testnet \
+            --source deployer \
+            -- initialize \
+            --admin $ADMIN_PK \
+            --reward_contract $REWARD_CONTRACT_ID || true
+
+      # ── 9. Update .env.local & README ─────────────────────────────────
+      - name: Update contract addresses
+        run: |
+          node scripts/update-addresses.mjs \
+            "$COUNTER_CONTRACT_ID" \
+            "$SDT_TOKEN_ADDRESS" \
+            "$PAYMENT_SPLITTER_ADDRESS" \
+            "$REWARD_CONTRACT_ID"
+
+      # ── 10. Commit updated addresses back to repo ─────────────────────
+      - name: Commit contract addresses
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update deployed contract addresses on testnet"
+          file_pattern: ".env.local README.md"
+          commit_user_name: "StellarPay CI Bot"
+          commit_user_email: "ci@stellarpay.dev"
+
+      # ── 11. Print summary ─────────────────────────────────────────────
+      - name: Deployment Summary
+        run: |
+          echo "════════════════════════════════════════"
+          echo "  StellarPay Contract Deployment Summary "
+          echo "════════════════════════════════════════"
+          echo "Counter:          $COUNTER_CONTRACT_ID"
+          echo "SDT Token:        $SDT_TOKEN_ADDRESS"
+          echo "Payment Splitter: $PAYMENT_SPLITTER_ADDRESS"
+          echo "Reward:           $REWARD_CONTRACT_ID"
+          echo ""
+          echo "View on Explorer:"
+          echo "https://stellar.expert/explorer/testnet/contract/$COUNTER_CONTRACT_ID"
