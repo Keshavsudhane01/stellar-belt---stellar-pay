@@ -49,23 +49,26 @@ NEXT_PUBLIC_REWARD_CONTRACT_ADDRESS=YOUR_REWARD_ADDRESS
 
 ## 🔬 Contract Addresses
 
-| Contract         | Address                           |
-|------------------|-----------------------------------|
-| Counter          | `YOUR_COUNTER_CONTRACT_ADDRESS`   |
-| Payment Splitter | `YOUR_SPLITTER_CONTRACT_ADDRESS`  |
-| Reward Contract  | `YOUR_REWARD_CONTRACT_ADDRESS`    |
-| SDT Token        | `YOUR_SDT_TOKEN_ADDRESS`          |
+| Contract         | Address                                                        |
+|------------------|----------------------------------------------------------------|
+| Counter          | `CDSDF3RZZ4TH2X2N4KJDT72P3AF2A4CLCVN3SXOKHUJ22SC7ZQIDQTFC` |
+| Payment Splitter | `CBTMVK7RTG6RHTQF2SDCFHXPDIULZBBIXVELUUFOBJPZJTDOSTBHBKHB` |
+| Reward Contract  | `CDIS7IB6CSFWLDEOTGQ6KLGKHKOO4NGZ42HQDUXPE5WANS3VRH3BGLVB` |
+| SDT Token        | `CAU2U5ZTXVPCO7SJZGLES5444LKTFJ5QRBFVBUED22TUQ2JNU4PSDKWV` |
 
 ---
 
 ## ✅ Verified Transactions
 
-| Action             | Hash                    | Link |
-|--------------------|-------------------------|------|
-| Contract deployed  | `YOUR_DEPLOY_TX_HASH`   | [View](https://stellar.expert/explorer/testnet/tx/YOUR_DEPLOY_TX_HASH) |
-| Counter increment  | `YOUR_INCREMENT_TX_HASH`| [View](https://stellar.expert/explorer/testnet/tx/YOUR_INCREMENT_TX_HASH) |
-| Payment split      | `YOUR_SPLIT_TX_HASH`    | [View](https://stellar.expert/explorer/testnet/tx/YOUR_SPLIT_TX_HASH) |
-| XLM sent           | `YOUR_SEND_TX_HASH`     | [View](https://stellar.expert/explorer/testnet/tx/YOUR_SEND_TX_HASH) |
+| Action                  | Hash                                                               | Explorer |
+|-------------------------|--------------------------------------------------------------------|----------|
+| Counter deployed        | `40b2e68dfe3d1c242f2efe24abcdaa5fba1d20bbec6d1804847149073bf1c6d3` | [View ↗](https://stellar.expert/explorer/testnet/tx/40b2e68dfe3d1c242f2efe24abcdaa5fba1d20bbec6d1804847149073bf1c6d3) |
+| Counter initialized     | `9772e26d888da39a19af6249beac83d156fa55c7daa30e27808a08704a0b2de9` | [View ↗](https://stellar.expert/explorer/testnet/tx/9772e26d888da39a19af6249beac83d156fa55c7daa30e27808a08704a0b2de9) |
+| Reward deployed         | `4ed1239f513e1e7f27f767c675bbbdc43d177dd358fc0453689bba97effb7c96` | [View ↗](https://stellar.expert/explorer/testnet/tx/4ed1239f513e1e7f27f767c675bbbdc43d177dd358fc0453689bba97effb7c96) |
+| Reward initialized      | `bdefa17ebe822f9a1a30af0aa997282339a7b7b3f1164a59de2fe4f5109d02bf` | [View ↗](https://stellar.expert/explorer/testnet/tx/bdefa17ebe822f9a1a30af0aa997282339a7b7b3f1164a59de2fe4f5109d02bf) |
+| Splitter deployed       | `9ef4587139bb2072b2fbaa2418aa6837b1d5ae96b9c0dcd19367d5b3ca294cbf` | [View ↗](https://stellar.expert/explorer/testnet/tx/9ef4587139bb2072b2fbaa2418aa6837b1d5ae96b9c0dcd19367d5b3ca294cbf) |
+| Splitter initialized    | `295c2cf9061427e14d48c3cae59a73719fb6556fbe44fbf388898d4dfa66f2c6` | [View ↗](https://stellar.expert/explorer/testnet/tx/295c2cf9061427e14d48c3cae59a73719fb6556fbe44fbf388898d4dfa66f2c6) |
+| SDT token deployed      | `403037850a87c860d472e139c2da0b3af2c3d106bad0283b2f6db01dfffd2887` | [View ↗](https://stellar.expert/explorer/testnet/tx/403037850a87c860d472e139c2da0b3af2c3d106bad0283b2f6db01dfffd2887) |
 
 ---
 
