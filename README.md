@@ -100,7 +100,7 @@ NEXT_PUBLIC_REWARD_CONTRACT_ADDRESS=CDIS7IB6CSFWLDEOTGQ6KLGKHKOO4NGZ42HQDUXPE5WA
 
 ## 🎥 Demo Video
 
-[▶️ Watch 1-Minute Demo](https://loom.com/YOUR_LINK)
+[▶️ Watch 1-Minute Demo](https://www.loom.com/share/45accf85444e4edaa2e5614c7415c4af)
 
 ---
 
