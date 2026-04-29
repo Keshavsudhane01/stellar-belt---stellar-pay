@@ -9,7 +9,14 @@ import { Send, CheckCircle, XCircle, ArrowRight, ExternalLink, Info } from "luci
 type TxState = "IDLE" | "SIGNING" | "SENDING" | "SUCCESS" | "FAILED" | "REJECTED"
 
 export default function SendPayment() {
-  const { publicKey, balance, refreshBalance } = useWallet()
+  const {
+    publicKey,
+    balance,
+    refreshBalance,
+    setOptimisticBalance,
+    addOptimisticTx,
+    removeOptimisticTx
+  } = useWallet()
   const [destination, setDestination] = useState("")
   const [amount, setAmount] = useState("")
   const [memo, setMemo] = useState("")
@@ -72,8 +79,8 @@ export default function SendPayment() {
       pending: true
     }
 
-    useWallet().setOptimisticBalance?.(newBalance)
-    useWallet().addOptimisticTx?.(optimisticTx)
+    setOptimisticBalance?.(newBalance)
+    addOptimisticTx?.(optimisticTx)
 
     const result = await sendXLM({
       sourcePublicKey: publicKey,
@@ -86,13 +93,13 @@ export default function SendPayment() {
       setTxState("SUCCESS")
       setTxHash(result.hash)
       // Confirmed, clear optimistic state to let refreshBalance take over
-      useWallet().setOptimisticBalance?.(null)
-      useWallet().removeOptimisticTx?.(optId)
+      setOptimisticBalance?.(null)
+      removeOptimisticTx?.(optId)
       refreshBalance()
     } else {
       // Revert optimistic updates
-      useWallet().setOptimisticBalance?.(null)
-      useWallet().removeOptimisticTx?.(optId)
+      setOptimisticBalance?.(null)
+      removeOptimisticTx?.(optId)
       
       if (result.error?.includes("rejected") || result.error?.includes("cancelled")) {
         setTxState("REJECTED")

@@ -21,9 +21,16 @@ export default function TransactionList() {
   }
 
   useEffect(() => {
-    if (publicKey) {
-      fetchTransactions()
+    if (!publicKey) return
+
+    const loadTransactions = async () => {
+      setIsLoading(true)
+      const txs = await getRecentTransactions(publicKey)
+      setTransactions(txs)
+      setIsLoading(false)
     }
+
+    loadTransactions()
   }, [publicKey])
 
   const formatDate = (dateString: string) => {

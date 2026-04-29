@@ -1,10 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { FREIGHTER_ID } from "@creit.tech/stellar-wallets-kit/modules/freighter"
-import { XBULL_ID } from "@creit.tech/stellar-wallets-kit/modules/xbull"
-import { ALBEDO_ID } from "@creit.tech/stellar-wallets-kit/modules/albedo"
-import { X, Wallet, Monitor, Globe } from "lucide-react"
+import { X, Monitor, Globe, Anchor, Shield, Orbit } from "lucide-react"
 
 interface WalletOption {
   id: string
@@ -22,24 +19,24 @@ interface WalletModalProps {
 
 const WALLETS: WalletOption[] = [
   {
-    id: FREIGHTER_ID,
+    id: "freighter",
     name: "Freighter",
     description: "Browser Extension",
-    icon: <div className="w-10 h-10 bg-orange-500/20 text-orange-500 rounded-lg flex items-center justify-center text-xl">⚓</div>,
+    icon: <div className="w-10 h-10 bg-orange-500/20 text-orange-500 rounded-lg flex items-center justify-center"><Anchor className="w-5 h-5" /></div>,
     type: "Extension"
   },
   {
-    id: XBULL_ID,
+    id: "xbull",
     name: "xBull",
     description: "Browser Extension",
-    icon: <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-lg flex items-center justify-center text-xl">🐂</div>,
+    icon: <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-lg flex items-center justify-center"><Shield className="w-5 h-5" /></div>,
     type: "Extension"
   },
   {
-    id: ALBEDO_ID,
+    id: "albedo",
     name: "Albedo",
     description: "Web Wallet",
-    icon: <div className="w-10 h-10 bg-purple-500/20 text-purple-500 rounded-lg flex items-center justify-center text-xl">🌌</div>,
+    icon: <div className="w-10 h-10 bg-purple-500/20 text-purple-500 rounded-lg flex items-center justify-center"><Orbit className="w-5 h-5" /></div>,
     type: "Web"
   }
 ]
@@ -63,18 +60,18 @@ export default function WalletModal({ isOpen, onClose, onSelect }: WalletModalPr
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div 
+      <div
         className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
           <div>
             <h2 className="text-xl font-bold text-white">Connect Wallet</h2>
             <p className="text-sm text-slate-400">Select your preferred Stellar wallet</p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition"
           >
@@ -100,7 +97,7 @@ export default function WalletModal({ isOpen, onClose, onSelect }: WalletModalPr
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 {loadingId === wallet.id ? (
                   <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />

@@ -45,8 +45,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const handleWalletSelect = async (walletId: string) => {
     try {
-      kit.setWallet(walletId)
-      const { address } = await kit.fetchAddress()
+      const { connectWallet } = await import("../lib/wallet")
+      const result = await connectWallet(walletId)
+      if (!result) return
+      
+      const { address } = result
       
       localStorage.setItem("stellar_wallet_id", walletId)
       localStorage.setItem("stellar_wallet_pk", address)
@@ -70,8 +73,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setIsModalOpen(true)
   }
 
-  const disconnect = () => {
-    disconnectKit()
+  const disconnect = async () => {
+    const { disconnectKit } = await import("../lib/wallet")
+    await disconnectKit()
     setState(initialState)
   }
 
@@ -79,15 +83,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const pk = localStorage.getItem("stellar_wallet_pk")
     const walletId = localStorage.getItem("stellar_wallet_id")
     if (pk && walletId) {
-      try {
-        kit.setWallet(walletId)
-        setState(prev => ({ ...prev, publicKey: pk, isConnected: true }))
-        getXLMBalance(pk).then(balance => {
+      const init = async () => {
+        try {
+          const { connectWallet } = await import("../lib/wallet")
+          await connectWallet(walletId)
+          setState(prev => ({ ...prev, publicKey: pk, isConnected: true }))
+          const balance = await getXLMBalance(pk)
           setState(prev => ({ ...prev, balance }))
-        })
-      } catch (e) {
-        console.error("Auto-reconnect failed:", e)
+        } catch (e) {
+          console.error("Auto-reconnect failed:", e)
+        }
       }
+      init()
     }
   }, [])
 
