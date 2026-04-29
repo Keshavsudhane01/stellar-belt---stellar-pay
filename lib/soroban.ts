@@ -3,7 +3,7 @@ import {
   Networks, BASE_FEE, Address, nativeToScVal, xdr,
   scValToNative, Account
 } from "@stellar/stellar-sdk"
-import { kit } from "./wallet"
+import { signWithKit } from "./wallet"
 
 const RPC_URL = "https://soroban-testnet.stellar.org"
 const server = new SorobanRpc.Server(RPC_URL)
@@ -58,10 +58,7 @@ export async function callIncrement(publicKey: string): Promise<{ count: number;
 
   tx = SorobanRpc.assembleTransaction(tx, simulation).build()
   
-  const { signedTxXdr } = await kit.signTransaction(tx.toXDR(), {
-    networkPassphrase: Networks.TESTNET,
-    address: publicKey
-  })
+  const signedTxXdr = await signWithKit(tx.toXDR(), publicKey)
 
   const submittedTx = await server.sendTransaction(TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET))
   
